@@ -22,10 +22,14 @@ sys.path.append('..')
 
 # %%
 # Import default class labels.
-from dataloaders.scannet_200_classes import CLASS_LABELS_200
+# from dataloaders.scannet_200_classes import CLASS_LABELS_200
 
+CLASS_LABELS_200 = ('wall', 'chair', 'floor', 'table', 'door', 'couch', 'cabinet', 'shelf', 'desk', 'office chair', 'bed', 'pillow', 'sink', 'picture', 'window', 'toilet', 'bookshelf', 'monitor', 'curtain', 'book', 'armchair', 'coffee table', 'box', 'refrigerator', 'lamp', 'kitchen cabinet', 'towel', 'clothes', 'tv', 'nightstand', 'counter', 'dresser', 'stool', 'cushion', 'plant', 'ceiling', 'bathtub', 'end table', 'dining table', 'keyboard', 'bag', 'backpack', 'toilet paper', 'printer', 'tv stand', 'whiteboard', 'blanket', 'shower curtain', 'trash can', 'closet', 'stairs', 'microwave', 'stove', 'shoe', 'computer tower', 'bottle', 'bin', 'ottoman', 'bench', 'board', 'washing machine', 'mirror', 'copier', 'basket', 'sofa chair', 'file cabinet', 'fan', 'laptop', 'shower', 'paper', 'person', 'paper towel dispenser', 'oven', 'blinds', 'rack', 'plate', 'blackboard', 'piano', 'suitcase', 'rail', 'radiator', 'recycling bin', 'container', 'wardrobe', 'soap dispenser', 'telephone', 'bucket', 'clock', 'stand', 'light', 'laundry basket', 'pipe', 'clothes dryer', 'guitar', 'toilet paper holder', 'seat', 'speaker', 'column', 'bicycle', 'ladder', 'bathroom stall', 'shower wall', 'cup', 'jacket', 'storage bin', 'coffee maker', 'dishwasher', 'paper towel roll', 'machine', 'mat', 'windowsill', 'bar', 'toaster', 'bulletin board', 'ironing board', 'fireplace', 'soap dish', 'kitchen counter', 'doorframe', 'toilet paper dispenser', 'mini fridge', 'fire extinguisher', 'ball', 'hat', 'shower curtain rod', 'water cooler', 'paper cutter', 'tray', 'shower door', 'pillar', 'ledge', 'toaster oven', 'mouse', 'toilet seat cover dispenser', 'furniture', 'cart', 'storage container', 'scale', 'tissue box', 'light switch', 'crate', 'power outlet', 'decoration', 'sign', 'projector', 'closet door', 'vacuum cleaner', 'candle', 'plunger', 'stuffed animal', 'headphones', 'dish rack', 'broom', 'guitar case', 'range hood', 'dustpan', 'hair dryer', 'water bottle', 'handicap bar', 'purse', 'vent', 'shower floor', 'water pitcher', 'mailbox', 'bowl', 'paper bag', 'alarm clock', 'music stand', 'projector screen', 'divider', 'laundry detergent', 'bathroom counter', 'object', 'bathroom vanity', 'closet wall', 'laundry hamper', 'bathroom stall door', 'ceiling light', 'trash bin', 'dumbbell', 'stair rail', 'tube', 'bathroom cabinet', 'cd case', 'closet rod', 'coffee kettle', 'structure', 'shower head', 'keyboard piano', 'case of water bottles', 'coat rack', 'storage organizer', 'folded chair', 'fire alarm', 'power strip', 'calendar', 'poster', 'potted plant', 'luggage', 'mattress')
 # TODO: Replace with your own path.
 DATA_PATH = '../nyu.r3d'
+print(f"Line 29, DATA_PATH: {DATA_PATH}")
+
+k=1
 
 # %% [markdown]
 # ## Creating a parser for the r3d file
@@ -42,7 +46,7 @@ DATA_PATH = '../nyu.r3d'
 # }
 # ```
 
-# %%
+# # %%
 class R3DSemanticDataset(Dataset):
     def __init__(
         self,
@@ -220,7 +224,7 @@ class R3DSemanticDataset(Dataset):
         }
         return result
 
-
+l=1
 # %% [markdown]
 # ## Creating the view dataset
 # 
@@ -322,9 +326,10 @@ CUSTOM_LABELS = [
     "folded chair",
     "power strip",
 ]
-
+k=1
 # %%
 dataset = R3DSemanticDataset(DATA_PATH, CUSTOM_LABELS)
+print(f"Line 331, dataset: {dataset}")
 
 # %% [markdown]
 # ## Visualizing the results
@@ -332,30 +337,40 @@ dataset = R3DSemanticDataset(DATA_PATH, CUSTOM_LABELS)
 # We can also visualize the parsed R3D file's contents.
 
 # %%
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-fig, axes = plt.subplots(1, 3, figsize=(8, 3))
+# fig, axes = plt.subplots(1, 3, figsize=(8, 3))
 
-titles = ["RGB", "Depth", "Confidence"]
-for ax, data, title in zip(axes, (dataset._rgb_images[0], dataset._depth_images[0], dataset._confidences[0]), titles):
-    ax.imshow(data)
-    ax.axis("off")
-    ax.set_title(title)
-
+# titles = ["RGB", "Depth", "Confidence"]
+# for ax, data, title in zip(axes, (dataset._rgb_images[0], dataset._depth_images[0], dataset._confidences[0]), titles):
+#     ax.imshow(data)
+#     ax.axis("off")
+#     ax.set_title(title)
+# l=1
 
 # %% [markdown]
 # Finally, we save our parsed R3D file to use in the next step of our process, which is to label them.
 
-# %%
-type(dataset)
-temp = dataset.detach().cpu()
+# # %%
+# type(dataset)
+# temp = dataset.detach().cpu()
 
-# %%
-import torch
+# # # %%
+# import torch
 
-temp = dataset.detach()
+# # temp = dataset.detach()
+# # dataset = R3DSemanticDataset(DATA_PATH, CUSTOM_LABELS)
+# print(f"Line 355, saving dataset to nyu_views_py.pth")
+# torch.save(dataset, '../nyu_views_py.pth')
+# print(f"Line 357, saved dataset to nyu_views_py.pth")
 
-torch.save(dataset, '../nyu_views.pth')
 
 
+import pickle
+
+# Save the dataset
+print(f"Line 355, saving dataset to nyu_views_py.pth")
+with open('nyu_views.pkl', 'wb') as f:
+    pickle.dump(dataset, f)
+print(f"Line 357, saved dataset to nyu_views_py.pth")
 
