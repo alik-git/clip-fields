@@ -1,0 +1,36 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "clipflabel",
+            "type": "python",
+            "python": "${command:python.interpreterPath}",
+            "cwd": "${workspaceFolder}/demo",
+            "request": "launch",
+            "program": "${workspaceFolder}/demo/label.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "clipfparse",
+            "type": "python",
+            "python": "${command:python.interpreterPath}",
+            "cwd": "${workspaceFolder}/demo",
+            "request": "launch",
+            "program": "${workspaceFolder}/demo/parse.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ],
+}
