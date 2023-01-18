@@ -6,6 +6,8 @@ import os
 import torch
 import tqdm
 import cv2
+import pathlib
+# from pathlib import Path
 
 import numpy as np
 from pathlib import Path
@@ -18,6 +20,7 @@ from dataloaders.scannet_200_classes import SCANNET_COLOR_MAP_200, CLASS_LABELS_
 from detectron2.utils.logger import setup_logger
 from sentence_transformers import SentenceTransformer
 from torch.utils.data import Dataset
+print(f"Line 20, torch: {torch}")
 
 setup_logger()
 d2_logger = logging.getLogger("detectron2")
@@ -31,55 +34,61 @@ from detectron2.config import get_cfg
 from detectron2.data import MetadataCatalog
 from detectron2.engine import DefaultPredictor
 
-# current_file_path = Path(__file__)
-# parts = current_file_path.parts
+current_file_path = Path(__file__)
+parts = current_file_path.parts
 
-# try:
-#     clip_fields_index = parts.index('clip-fields')
-# except ValueError:
-#     print(f"clip-fields not found in {current_file_path}")
-# else:
-#     root_dir = Path(*parts[0:clip_fields_index+1])
-#     print(f"root dir: {root_dir}")
+try:
+    clip_fields_index = parts.index('clip-fields')
+except ValueError:
+    print(f"clip-fields not found in {current_file_path}")
+else:
+    root_dir = Path(*parts[0:clip_fields_index+1])
+    print(f"root dir: {root_dir}")
     
-# DETIC_PATH = os.environ.get("DETIC_PATH", root_dir / "Detic")
-# print(f"Line 48, DETIC_PATH: {DETIC_PATH}")
-# LSEG_PATH = os.environ.get("LSEG_PATH", root_dir / "LSeg")
-# print(f"Line 50, LSEG_PATH: {LSEG_PATH}")
+DETIC_PATH = os.environ.get("DETIC_PATH", root_dir / "Detic")
+print(f"Line 48, DETIC_PATH: {DETIC_PATH}")
+LSEG_PATH = os.environ.get("LSEG_PATH", root_dir / "LSeg")
+print(f"Line 50, LSEG_PATH: {LSEG_PATH}")
 
-DETIC_PATH = "/home/ali/repos/clip-fields/Detic"
-# LSEG_PATH = ""
-
-
-# DETIC_PATH = os.environ.get("DETIC_PATH", Path(__file__).parent / "../Detic")
-# LSEG_PATH = os.environ.get("LSEG_PATH", Path(__file__).parent / "../LSeg/")
-# print(f"Line 36, LSEG_PATH: {LSEG_PATH}")
+# # /home/ali/repos/clip-fields/Detic
+# # DETIC_PATH = os.environ.get("DETIC_PATH", Path(__file__).parent / "../Detic")
+# # LSEG_PATH = os.environ.get("LSEG_PATH", Path(__file__).parent / "../LSeg/")
+# current_dir = Path.cwd()
+# print(f"Line 40, current_dir: {current_dir}")
+# current_file_path = Path(__file__)
+# print(f"Line 42, current_file_path: {current_file_path}")
+# root_dir = Path(__file__).parent.parent.parent
+# print(f"Line 42, root_dir: {root_dir}")
+# # DETIC_PATH = 
 
 # sys.path.insert(0, f"{LSEG_PATH}/")
+# print(f"Line 62, sys.path: {sys.path}")
+# print(f"Line 39, LSEG_PATH: {LSEG_PATH}")
+print("starting first set of imports")
 # from encoding.models.sseg import BaseNet
+from LSeg.additional_utils.models import LSeg_MultiEvalModule
+print(f"Line 70, LSeg:")
 # from additional_utils.models import LSeg_MultiEvalModule
+from LSeg.modules.lseg_module import LSegModule
+print(f"Line 71, LSeg:")
 # from modules.lseg_module import LSegModule
 import torchvision.transforms as transforms
+# print(f"Line 44, torchvision: {torchvision}")
+
+print("starting second set of imports")
 
 # Detic libraries
-sys.path.insert(0, f"{DETIC_PATH}/third_party/CenterNet2/")
-sys.path.insert(0, f"{DETIC_PATH}/")
-print(f"Line 66, sys.path: {sys.path}")
-from centernet.config import add_centernet_config
-from detic.config import add_detic_config
-from detic.modeling.utils import reset_cls_test
-from detic.modeling.text.text_encoder import build_text_encoder
+# sys.path.insert(0, f"{DETIC_PATH}/third_party/CenterNet2/")
+# sys.path.insert(0, f"{DETIC_PATH}/")
+from Detic.third_party.CenterNet2.centernet.config import add_centernet_config
+from Detic.detic.config import add_detic_config
+from Detic.detic.modeling.utils import reset_cls_test
+from Detic.detic.modeling.text.text_encoder import build_text_encoder
+# from detic.modeling.text.text_encoder import build_text_encoder
+# print(f"Line 52, detic: {detic}")
 
-# print("starting detic imports")
-# from Detic.third_party.CenterNet2.centernet.config import add_centernet_config
-# print("done first one")
-# # from Detic.detic.config import add_detic_config
-# print("done second one")
-# # from Detic.detic.modeling.utils import reset_cls_test
-# print("done third one")
-# from Detic.detic.modeling.text.text_encoder import build_text_encoder
+print("starting third set of imports")
 
-print("making config")
 cfg = get_cfg()
 add_centernet_config(cfg)
 add_detic_config(cfg)
@@ -96,7 +105,8 @@ cfg.MODEL.ROI_BOX_HEAD.CAT_FREQ_PATH = (
     f"{DETIC_PATH}/datasets/metadata/lvis_v1_train_cat_info.json"
 )
 # cfg.MODEL.DEVICE='cpu' # uncomment this to use cpu-only mode.
-print("done making config")
+print(f"Line 70, cfg: {cfg}")
+
 
 def get_clip_embeddings(vocabulary, prompt="a "):
     text_encoder = build_text_encoder(pretrain=True)
@@ -104,14 +114,14 @@ def get_clip_embeddings(vocabulary, prompt="a "):
     texts = [prompt + x.replace("-", " ") for x in vocabulary]
     emb = text_encoder(texts).detach().permute(1, 0).contiguous().cpu()
     return emb
+print(f"Line 79, g: ")
 
-print("done functions")
+
 # New visualizer class to disable jitter.
 from detectron2.utils.visualizer import Visualizer
 from detectron2.utils.visualizer import ColorMode
 import matplotlib.colors as mplc
 
-print("importing done")
 
 class LowJitterVisualizer(Visualizer):
     def _jitter(self, color):
@@ -138,16 +148,18 @@ class LowJitterVisualizer(Visualizer):
 SCANNET_NAME_TO_COLOR = {
     x: np.array(c) for x, c in zip(CLASS_LABELS_200, SCANNET_COLOR_MAP_200.values())
 }
+print(f"Line 111, SCANNET_NAME_TO_COLOR: {SCANNET_NAME_TO_COLOR}")
 
 SCANNET_ID_TO_COLOR = {
     i: np.array(c) for i, c in enumerate(SCANNET_COLOR_MAP_200.values())
 }
 
-print("Loading Detic model...")
+print(f"Line 116, _ID_TO_COLOR: {SCANNET_ID_TO_COLOR}")
 
 class DeticDenseLabelledDataset(Dataset):
     LSEG_LABEL_WEIGHT = 0.1
     LSEG_IMAGE_DISTANCE = 10.0
+    print(f"Line 117, LSEG_IMAGE_DISTANCE: {LSEG_IMAGE_DISTANCE}")
 
     def __init__(
         self,
@@ -178,6 +190,7 @@ class DeticDenseLabelledDataset(Dataset):
         sentence_model = SentenceTransformer(sentence_encoding_model_name)
 
         self._batch_size = batch_size
+        print(f"Line 148, self._batch_size: {self._batch_size}")
         self._device = device
         self._detic_threshold = detic_threshold
         self._subsample_prob = subsample_prob
@@ -199,6 +212,7 @@ class DeticDenseLabelledDataset(Dataset):
         self._use_extra_classes = use_extra_classes
         self._use_gt_classes = use_gt_classes
         self._use_scannet_colors = use_scannet_colors
+        print(f"Line 170, self._use_scannet_colors: {self._use_scannet_colors}")
 
         self._visualize = visualize_results
         if self._visualize:
@@ -318,6 +332,7 @@ class DeticDenseLabelledDataset(Dataset):
                     )
                     self._distance.append(torch.zeros(total_points)[resampled_indices])
                     label_idx += 1
+                    print(f"Line 297, label_idx: {label_idx}")
 
         # First delete leftover Detic predictors
         del self._predictor
@@ -396,6 +411,7 @@ class DeticDenseLabelledDataset(Dataset):
                     # Since they all get the same image, here label idx is increased once
                     # at the very end.
                     label_idx += 1
+                    print(f"Line 376, label_idx: {label_idx}")
 
             # Now, delete the module and the evaluator
             del self.evaluator
@@ -413,6 +429,7 @@ class DeticDenseLabelledDataset(Dataset):
 
         for i, feature in enumerate(all_embedded_text):
             self._text_id_to_feature[i] = feature
+        print(f"Line 394, i: {i}")
 
         # Now, we map from label to text using this model.
         self._label_xyz = torch.cat(self._label_xyz).float()
@@ -583,10 +600,12 @@ class DeticDenseLabelledDataset(Dataset):
                     LSEG_URL, LSEG_MODEL_PATH
                 )
             )
-        if isinstance(self.module.net, BaseNet):
-            model = self.module.net
-        else:
-            model = self.module
+        # if isinstance(self.module.net, BaseNet):
+        #     model = self.module.net
+        # else:
+        #     model = self.module
+
+        model = self.module.net
 
         model = model.eval()
         model = model.to(self._device)
@@ -602,3 +621,5 @@ class DeticDenseLabelledDataset(Dataset):
             self._device
         )
         self.evaluator = self.evaluator.eval()
+
+print("done file")

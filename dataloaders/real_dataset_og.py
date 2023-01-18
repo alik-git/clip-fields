@@ -31,55 +31,24 @@ from detectron2.config import get_cfg
 from detectron2.data import MetadataCatalog
 from detectron2.engine import DefaultPredictor
 
-# current_file_path = Path(__file__)
-# parts = current_file_path.parts
 
-# try:
-#     clip_fields_index = parts.index('clip-fields')
-# except ValueError:
-#     print(f"clip-fields not found in {current_file_path}")
-# else:
-#     root_dir = Path(*parts[0:clip_fields_index+1])
-#     print(f"root dir: {root_dir}")
-    
-# DETIC_PATH = os.environ.get("DETIC_PATH", root_dir / "Detic")
-# print(f"Line 48, DETIC_PATH: {DETIC_PATH}")
-# LSEG_PATH = os.environ.get("LSEG_PATH", root_dir / "LSeg")
-# print(f"Line 50, LSEG_PATH: {LSEG_PATH}")
+DETIC_PATH = os.environ.get("DETIC_PATH", Path(__file__).parent / "../Detic")
+LSEG_PATH = os.environ.get("LSEG_PATH", Path(__file__).parent / "../LSeg/")
 
-DETIC_PATH = "/home/ali/repos/clip-fields/Detic"
-# LSEG_PATH = ""
-
-
-# DETIC_PATH = os.environ.get("DETIC_PATH", Path(__file__).parent / "../Detic")
-# LSEG_PATH = os.environ.get("LSEG_PATH", Path(__file__).parent / "../LSeg/")
-# print(f"Line 36, LSEG_PATH: {LSEG_PATH}")
-
-# sys.path.insert(0, f"{LSEG_PATH}/")
-# from encoding.models.sseg import BaseNet
-# from additional_utils.models import LSeg_MultiEvalModule
-# from modules.lseg_module import LSegModule
+sys.path.insert(0, f"{LSEG_PATH}/")
+from encoding.models.sseg import BaseNet
+from additional_utils.models import LSeg_MultiEvalModule
+from modules.lseg_module import LSegModule
 import torchvision.transforms as transforms
 
 # Detic libraries
 sys.path.insert(0, f"{DETIC_PATH}/third_party/CenterNet2/")
 sys.path.insert(0, f"{DETIC_PATH}/")
-print(f"Line 66, sys.path: {sys.path}")
 from centernet.config import add_centernet_config
 from detic.config import add_detic_config
 from detic.modeling.utils import reset_cls_test
 from detic.modeling.text.text_encoder import build_text_encoder
 
-# print("starting detic imports")
-# from Detic.third_party.CenterNet2.centernet.config import add_centernet_config
-# print("done first one")
-# # from Detic.detic.config import add_detic_config
-# print("done second one")
-# # from Detic.detic.modeling.utils import reset_cls_test
-# print("done third one")
-# from Detic.detic.modeling.text.text_encoder import build_text_encoder
-
-print("making config")
 cfg = get_cfg()
 add_centernet_config(cfg)
 add_detic_config(cfg)
@@ -96,7 +65,7 @@ cfg.MODEL.ROI_BOX_HEAD.CAT_FREQ_PATH = (
     f"{DETIC_PATH}/datasets/metadata/lvis_v1_train_cat_info.json"
 )
 # cfg.MODEL.DEVICE='cpu' # uncomment this to use cpu-only mode.
-print("done making config")
+
 
 def get_clip_embeddings(vocabulary, prompt="a "):
     text_encoder = build_text_encoder(pretrain=True)
@@ -105,13 +74,12 @@ def get_clip_embeddings(vocabulary, prompt="a "):
     emb = text_encoder(texts).detach().permute(1, 0).contiguous().cpu()
     return emb
 
-print("done functions")
+
 # New visualizer class to disable jitter.
 from detectron2.utils.visualizer import Visualizer
 from detectron2.utils.visualizer import ColorMode
 import matplotlib.colors as mplc
 
-print("importing done")
 
 class LowJitterVisualizer(Visualizer):
     def _jitter(self, color):
@@ -143,7 +111,6 @@ SCANNET_ID_TO_COLOR = {
     i: np.array(c) for i, c in enumerate(SCANNET_COLOR_MAP_200.values())
 }
 
-print("Loading Detic model...")
 
 class DeticDenseLabelledDataset(Dataset):
     LSEG_LABEL_WEIGHT = 0.1
